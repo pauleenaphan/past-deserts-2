@@ -3,7 +3,7 @@ import { PiCactusFill } from "react-icons/pi";
 
 export const Nav = () => {
   return(
-    <div className="flex justify-around items-center p-8 mb-32 font-bold bg-cardcolor">
+    <div className="flex justify-around items-center p-8 mb-16 font-bold bg-cardcolor">
       <div className="flex items-center gap-2">
         <h1 className="text-4xl"> Past Deserts </h1>
         <PiCactusFill className="text-5xl text-accentcolor"/>
