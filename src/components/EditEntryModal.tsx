@@ -149,11 +149,19 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
     const files = e.target.files
     if (files) {
       const fileArray = Array.from(files)
-      const imageUrls = fileArray.map(file => URL.createObjectURL(file))
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...imageUrls]
-      }))
+      
+      // Convert files to base64 strings
+      fileArray.forEach(file => {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          const base64String = event.target?.result as string
+          setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, base64String]
+          }))
+        }
+        reader.readAsDataURL(file)
+      })
     }
   }
 
