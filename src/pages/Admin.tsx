@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { FaRegTrashAlt, FaRegEdit } from "react-icons/fa";
 
 import { AddEntryModal } from '../components/AddEntryModal'
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal'
@@ -56,42 +57,37 @@ export const Admin = () => {
   }
 
   return(
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
-      
-      <button 
-        onClick={() => setIsModalOpen(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors mb-6"
-      >
-        Add Entry
-      </button>
-      
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold mb-4">Current Entries</h2>
-        <p className="text-gray-600">List of entries here, click to edit/delete one</p>
+    <div className="flex flex-col w-1/2 mx-auto py-8 gap-4">
+      <h1 className="text-4xl font-bold text-center mb-8">Admin Panel</h1>
+      <div className="flex justify-between items-end">
+        <h2 className="text-2xl font-bold">Current Entries</h2>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="primary-btn"
+        >
+          Add Entry
+        </button>
+      </div>
+      <div className="border-2"></div>
+      <div className="flex flex-col gap-4">
         {entries.map((entry, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
-            <h3>{entry.name}</h3>
-            <p>{entry.date}</p>
-            <p>{entry.rating}</p>
-            <p>{entry.difficulty}</p>
-            {entry.images && entry.images.length > 0 ? (
-              <img src={entry.images[0]} alt={entry.name} className="w-10 h-10 object-cover rounded-md"/>
-            ) : (
-              <p>No images</p>
-            )}
-            <button 
-              onClick={() => handleDeleteClick(entry)}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => handleEditClick(entry)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-            >
-              Edit
-            </button>
+          <div key={index} className="flex justify-between items-center gap-4">
+            <div>
+              <p className="text-lg font-semibold">{entry.name}</p>
+              <p>{entry.date}</p>
+            </div>
+            <div className="text-3xl flex items-center gap-2">
+              <FaRegEdit
+                onClick={() => handleEditClick(entry)}
+                className="cursor-pointer hover:text-black"
+              >
+              </FaRegEdit>
+              <FaRegTrashAlt
+                onClick={() => handleDeleteClick(entry)}
+                className="cursor-pointer hover:text-black"
+              >
+              </FaRegTrashAlt>
+            </div>
           </div>
         ))}
       </div>

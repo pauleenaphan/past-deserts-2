@@ -9,7 +9,7 @@ import { Admin } from './pages/Admin'
 function App(): JSX.Element {
   return (
     <Router>
-      <div className='min-h-screen bg-gray-100'>
+      <div className='min-h-screen bg-bgcolor'>
         <Nav />
         <Routes>
           <Route path="/" element={<Home />} />

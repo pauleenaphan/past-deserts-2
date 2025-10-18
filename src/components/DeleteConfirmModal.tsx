@@ -28,8 +28,8 @@ export const DeleteConfirmModal = ({ isOpen, onOpenChange, entry, onConfirm }: D
     <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-full max-w-md z-50 shadow-xl">
-          <Dialog.Title className="text-xl font-semibold mb-4">
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-bgcolor rounded-lg p-12 w-full max-w-3xl z-50 shadow-xl">
+          <Dialog.Title className="text-3xl font-semibold mb-4">
             Confirm Delete
           </Dialog.Title>
           
@@ -37,9 +37,9 @@ export const DeleteConfirmModal = ({ isOpen, onOpenChange, entry, onConfirm }: D
             Are you sure you want to delete "{entry?.name}"? This action cannot be undone.
           </Dialog.Description>
 
-          <form id="delete-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="delete-form" onSubmit={handleSubmit} className="mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="label">
                 Password
               </label>
               <input 
@@ -47,7 +47,7 @@ export const DeleteConfirmModal = ({ isOpen, onOpenChange, entry, onConfirm }: D
                 name="password" 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input"
               />
             </div>
           </form>
@@ -64,7 +64,7 @@ export const DeleteConfirmModal = ({ isOpen, onOpenChange, entry, onConfirm }: D
             <button 
               type="submit"
               form="delete-form"
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+              className="primary-btn"
             >
               Delete
             </button>
