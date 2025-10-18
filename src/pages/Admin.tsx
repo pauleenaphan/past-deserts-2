@@ -57,7 +57,7 @@ export const Admin = () => {
   }
 
   return(
-    <div className="flex flex-col w-1/2 mx-auto py-8 gap-4">
+    <div className="flex flex-col w-4/5 md:w-1/2 mx-auto pb-8 gap-4">
       <h1 className="text-4xl font-bold text-center mb-8">Admin Panel</h1>
       <div className="flex justify-between items-end">
         <h2 className="text-2xl font-bold">Current Entries</h2>
