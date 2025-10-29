@@ -11,15 +11,15 @@ export const Entries = () => {
   
   useEffect(() => {
     getEntries().then(data => setEntries(data as Entry[]))
-  }, [entries])
+  }, [])
 
   return(
     <div className="flex flex-col w-4/5 md:w-3/4 mx-auto pb-8 gap-4">
       <h1 className="text-3xl font-bold">All Entries</h1>
       <h2 className="text-2xl font-bold"> Total Entries: {entries.length}</h2>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-6">
         {entries.map((entry, index) => (
-          <div key={index} className="border border-[#D4C4A8] rounded-br-md rounded-bl-md bg-white w-full md:w-1/4 shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col">
+          <div key={index} className="border border-[#D4C4A8] rounded-br-md rounded-bl-md flex-grow bg-white w-full md:w-1/4 max-w-md shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col">
             {entry.images && entry.images.length > 0 ? (
               <img 
                 src={entry.images[0]} 
@@ -35,8 +35,8 @@ export const Entries = () => {
                 <p className="text-gray-500">No image available</p>
               </div>
             )}
-            <div className="p-6 flex flex-col gap-4 justify-between flex-1">
-              <div className="space-y-4">
+            <div className="p-6 flex flex-col gap-6 justify-between flex-1">
+              <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
                   {entry.labels.map((label, labelIndex) => (
                     <span 

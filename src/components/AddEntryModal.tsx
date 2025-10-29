@@ -32,6 +32,7 @@ export const AddEntryModal = ({ isOpen, onOpenChange }: AddEntryModalProps) => {
     labels: [],
     password: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
@@ -42,6 +43,8 @@ export const AddEntryModal = ({ isOpen, onOpenChange }: AddEntryModalProps) => {
       alert('Incorrect password. Access denied.')
       return
     }
+    
+    setIsLoading(true)
     
     try {
       // Format date to MM/DD/YYYY format for storage
@@ -73,6 +76,8 @@ export const AddEntryModal = ({ isOpen, onOpenChange }: AddEntryModalProps) => {
       console.error('Error submitting form:', error)
       // You could add a toast notification or error state here
       alert('Failed to save entry. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -111,23 +116,74 @@ export const AddEntryModal = ({ isOpen, onOpenChange }: AddEntryModalProps) => {
     }))
   }
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>): void => {
+  const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        let { width, height } = img
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height)
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
+        resolve(compressedDataUrl)
+      }
+      
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = e.target.files
     if (files) {
       const fileArray = Array.from(files)
       
-      // Convert files to base64 strings
-      fileArray.forEach(file => {
-        const reader = new FileReader()
-        reader.onload = (event) => {
-          const base64String = event.target?.result as string
+      // Process files with compression
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i]
+        
+        try {
+          // Compress image if it's larger than 500KB
+          let base64String: string
+          if (file.size > 500000) { // 500KB
+            console.log(`Compressing large image: ${file.name}`)
+            base64String = await compressImage(file, 800, 0.7)
+          } else {
+            // Use original for small images
+            base64String = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader()
+              reader.onload = (event) => resolve(event.target?.result as string)
+              reader.onerror = reject
+              reader.readAsDataURL(file)
+            })
+          }
+          
+          // Check if still too large
+          if (base64String.length > 1000000) { // 1MB limit
+            alert(`Image "${file.name}" is too large even after compression. Please use a smaller image.`)
+            continue
+          }
+          
           setFormData(prev => ({
             ...prev,
             images: [...prev.images, base64String]
           }))
+        } catch (error) {
+          console.error('Error processing file:', error)
+          alert(`Error processing image "${file.name}". Please try a different image.`)
         }
-        reader.readAsDataURL(file)
-      })
+      }
     }
   }
 
@@ -184,17 +240,17 @@ export const AddEntryModal = ({ isOpen, onOpenChange }: AddEntryModalProps) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label block mb-1">
-                  Rating (1-5 Stars)
+                  Rating (1-5 Cactus)
                 </label>
                 <CustomSelect
                   value={formData.rating.toString()}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, rating: parseInt(value) }))}
                   options={[
-                    { value: '1', label: '1 Star' },
-                    { value: '2', label: '2 Stars' },
-                    { value: '3', label: '3 Stars' },
-                    { value: '4', label: '4 Stars' },
-                    { value: '5', label: '5 Stars' }
+                    { value: '1', label: '1 Cactus' },
+                    { value: '2', label: '2 Cactuses' },
+                    { value: '3', label: '3 Cactuses' },
+                    { value: '4', label: '4 Cactuses' },
+                    { value: '5', label: '5 Cactuses' }
                   ]}
                   placeholder="Select rating"
                 />
@@ -355,8 +411,9 @@ export const AddEntryModal = ({ isOpen, onOpenChange }: AddEntryModalProps) => {
               <button 
                 type="submit"
                 className="primary-btn"
+                disabled={isLoading}
               >
-                Add Entry
+                {isLoading ? 'Adding...' : 'Add Entry'}
               </button>
             </div>
           </form>

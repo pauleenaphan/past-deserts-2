@@ -34,6 +34,7 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
     labels: [],
     password: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
 
   const [labelInput, setLabelInput] = useState<string>('')
 
@@ -66,21 +67,39 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
+    console.log('=== EDIT ENTRY FORM SUBMISSION START ===')
+    console.log('Form submitted with data:', formData)
+    console.log('Entry ID:', entry?.id)
+    console.log('Form data keys:', Object.keys(formData))
+    console.log('Form data values:', Object.values(formData))
     
-    if (!entry?.id) return
+    if (!entry?.id) {
+      console.log('❌ No entry ID found')
+      return
+    }
 
     // Check password
     const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD
+    console.log('Admin password check:', formData.password === adminPassword ? 'PASSED' : 'FAILED')
     if (formData.password !== adminPassword) {
+      console.log('❌ Password validation failed')
       alert('Incorrect password. Access denied.')
       return
     }
 
+    setIsLoading(true)
+
     try {
+      console.log('✅ Password validation passed, proceeding with edit')
+      
       // Format date to MM/DD/YYYY format for storage
+      const originalDate = formData.date
+      const formattedDate = new Date(formData.date).toLocaleDateString('en-US')
+      console.log('Date formatting:', { originalDate, formattedDate })
+      
       const formattedFormData = {
         ...formData,
-        date: new Date(formData.date).toLocaleDateString('en-US')
+        date: formattedDate
       }
       
       const updatedEntry: Entry = {
@@ -88,10 +107,15 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
         ...formattedFormData
       }
       
+      console.log('Updated entry before API call:', updatedEntry)
+      console.log('Images count:', updatedEntry.images.length)
+      console.log('Labels count:', updatedEntry.labels.length)
+      
+      console.log('🚀 Calling onSave API...')
       await onSave(updatedEntry)
-      console.log('Entry updated successfully:', updatedEntry)
       
       // Reset form
+      console.log('🔄 Resetting form data...')
       setFormData({ 
         name: '', 
         date: '', 
@@ -105,10 +129,21 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
       })
       
       // Close modal
+      console.log('🚪 Closing modal...')
       onOpenChange(false)
+      console.log('=== EDIT ENTRY FORM SUBMISSION COMPLETE ===')
     } catch (error) {
-      console.error('Error updating entry:', error)
+      console.error('❌ Error updating entry:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        formData: formData,
+        entryId: entry?.id
+      })
       alert('Failed to update entry. Please try again.')
+      console.log('=== EDIT ENTRY FORM SUBMISSION FAILED ===')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -145,23 +180,74 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
     }))
   }
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>): void => {
+  const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        let { width, height } = img
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height)
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
+        resolve(compressedDataUrl)
+      }
+      
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = e.target.files
     if (files) {
       const fileArray = Array.from(files)
       
-      // Convert files to base64 strings
-      fileArray.forEach(file => {
-        const reader = new FileReader()
-        reader.onload = (event) => {
-          const base64String = event.target?.result as string
+      // Process files with compression
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i]
+        
+        try {
+          // Compress image if it's larger than 500KB
+          let base64String: string
+          if (file.size > 500000) { // 500KB
+            console.log(`Compressing large image: ${file.name}`)
+            base64String = await compressImage(file, 800, 0.7)
+          } else {
+            // Use original for small images
+            base64String = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader()
+              reader.onload = (event) => resolve(event.target?.result as string)
+              reader.onerror = reject
+              reader.readAsDataURL(file)
+            })
+          }
+          
+          // Check if still too large
+          if (base64String.length > 1000000) { // 1MB limit
+            alert(`Image "${file.name}" is too large even after compression. Please use a smaller image.`)
+            continue
+          }
+          
           setFormData(prev => ({
             ...prev,
             images: [...prev.images, base64String]
           }))
+        } catch (error) {
+          console.error('Error processing file:', error)
+          alert(`Error processing image "${file.name}". Please try a different image.`)
         }
-        reader.readAsDataURL(file)
-      })
+      }
     }
   }
 
@@ -389,8 +475,9 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
               <button 
                 type="submit"
                 className="primary-btn"
+                disabled={isLoading}
               >
-                Update Entry
+                {isLoading ? 'Updating...' : 'Update Entry'}
               </button>
             </div>
           </form>

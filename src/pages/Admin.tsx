@@ -15,8 +15,14 @@ export const Admin = () => {
   const [entryToEdit, setEntryToEdit] = useState<Entry | null>(null)
 
   useEffect(() => {
-    getEntries().then(data => setEntries(data as Entry[]))
-  }, [entries])
+    getEntries().then(data => {
+      const sortedEntries = (data as Entry[]).sort((a, b) => {
+        // Sort by date in descending order (newest to oldest)
+        return new Date(b.date).getTime() - new Date(a.date).getTime()
+      })
+      setEntries(sortedEntries)
+    })
+  }, [])
 
   const handleDeleteClick = (entry: Entry) => {
     setEntryToDelete(entry)
@@ -45,9 +51,14 @@ export const Admin = () => {
   const handleEditSave = async (updatedEntry: Entry) => {
     try {
       await editEntry(updatedEntry)
-      setEntries(entries.map(entry => 
+      const updatedEntries = entries.map(entry => 
         entry.id === updatedEntry.id ? updatedEntry : entry
-      ))
+      )
+      // Re-sort entries after update to maintain newest to oldest order
+      const sortedEntries = updatedEntries.sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime()
+      })
+      setEntries(sortedEntries)
       setEditModalOpen(false)
       setEntryToEdit(null)
     } catch (error) {

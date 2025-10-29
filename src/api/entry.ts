@@ -14,21 +14,82 @@ export interface Entry{
 }
 
 export const addEntry = async (entry: Entry) => {
-  const docRef = await addDoc(collection(db, 'Entries'), entry);
-  console.log('Document written with ID: ', docRef.id);
-  return docRef;
+  try {
+    const docRef = await addDoc(collection(db, 'Entries'), entry);
+    console.log('API: Document written with ID:', docRef.id);
+    console.log('=== API: addEntry SUCCESS ===');
+    return docRef;
+  } catch (error) {
+    console.error('API: Error adding entry:', error);
+    console.error('API: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      entry: entry
+    });
+    console.log('=== API: addEntry FAILED ===');
+    throw error;
+  }
 }
 
 export const getEntries = async () => {
-  const querySnapshot = await getDocs(collection(db, 'Entries'));
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  console.log('=== API: getEntries START ===');
+  try {
+    const querySnapshot = await getDocs(collection(db, 'Entries'));
+    const entries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log('=== API: getEntries SUCCESS ===');
+    return entries;
+  } catch (error) {
+    console.error('API: Error getting entries:', error);
+    console.error('API: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    console.log('=== API: getEntries FAILED ===');
+    throw error;
+  }
 }
 
 export const editEntry = async (entry: Entry) => {
-  const { id, ...entryData } = entry;
-  await updateDoc(doc(db, 'Entries', id!), entryData);
+  try {
+    const { id, ...entryData } = entry;
+    console.log('API: Entry data to update (without ID):', entryData);
+    
+    if (!id) {
+      throw new Error('Entry ID is required for editing');
+    }
+    
+    await updateDoc(doc(db, 'Entries', id), entryData);
+    console.log('=API: Document updated successfully with ID:', id);
+    console.log('=== API: editEntry SUCCESS ===');
+  } catch (error) {
+    console.error('API: Error editing entry:', error);
+    console.error('API: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      entry: entry,
+      entryId: entry.id
+    });
+    console.log('=== API: editEntry FAILED ===');
+    throw error;
+  }
 }
 
 export const deleteEntry = async (id: string) => {
-  await deleteDoc(doc(db, 'Entries', id));
+  console.log('=== API: deleteEntry START ===');
+  console.log('API: Deleting entry with ID:', id);
+  
+  try {
+    await deleteDoc(doc(db, 'Entries', id));
+    console.log('API: Document deleted successfully with ID:', id);
+    console.log('=== API: deleteEntry SUCCESS ===');
+  } catch (error) {
+    console.error('API: Error deleting entry:', error);
+    console.error('API: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      entryId: id
+    });
+    console.log('=== API: deleteEntry FAILED ===');
+    throw error;
+  }
 }

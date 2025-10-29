@@ -68,25 +68,15 @@ export const Entry = () => {
         </div>
 
         {entry.images && entry.images.length >= 1 && (
-          <div className="mt-8 flex justify-center pb-12">
-            {entry.images.length === 1 ? (
+          <div className="mt-8 pb-12 flex flex-wrap gap-4 flex-1">
+            {entry.images.map((image, index) => (
               <img 
-                src={entry.images[0]} 
-                alt={entry.name}
-                className="max-w-2xl w-full h-auto object-cover rounded-lg"
+                key={index}
+                src={image} 
+                alt={`${entry.name} - Image ${index + 1}`}
+                className="max-w-sm h-auto object-cover rounded-lg"
               />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-                {entry.images.map((image, index) => (
-                  <img 
-                    key={index}
-                    src={image} 
-                    alt={`${entry.name} - Image ${index + 1}`}
-                    className="w-full h-auto object-cover rounded-lg"
-                  />
-                ))}
-              </div>
-            )}
+            ))}
           </div>
         )}
       </div>
