@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 export interface Entry {
@@ -31,6 +31,21 @@ export const getEntries = async (): Promise<Entry[]> => {
     return entries;
   } catch (error) {
     console.error('API: Error getting entries:', error);
+    throw error;
+  }
+}
+
+export const getEntryById = async (id: string): Promise<Entry | null> => {
+  try {
+    const docRef = doc(db, 'Entries', id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Entry;
+    }
+    return null;
+  } catch (error) {
+    console.error('API: Error getting entry by ID:', error);
     throw error;
   }
 }

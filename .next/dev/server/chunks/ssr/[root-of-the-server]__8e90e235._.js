@@ -162,7 +162,9 @@ __turbopack_context__.s([
     "editEntry",
     ()=>editEntry,
     "getEntries",
-    ()=>getEntries
+    ()=>getEntries,
+    "getEntryById",
+    ()=>getEntryById
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/index.mjs [app-rsc] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.node.mjs [app-rsc] (ecmascript)");
@@ -189,6 +191,22 @@ const getEntries = async ()=>{
         return entries;
     } catch (error) {
         console.error('API: Error getting entries:', error);
+        throw error;
+    }
+};
+const getEntryById = async (id)=>{
+    try {
+        const docRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["doc"])(__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$firebase$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'Entries', id);
+        const docSnap = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getDoc"])(docRef);
+        if (docSnap.exists()) {
+            return {
+                id: docSnap.id,
+                ...docSnap.data()
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('API: Error getting entry by ID:', error);
         throw error;
     }
 };

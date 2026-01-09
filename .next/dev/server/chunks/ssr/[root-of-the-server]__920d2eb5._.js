@@ -126,7 +126,9 @@ __turbopack_context__.s([
     "editEntry",
     ()=>editEntry,
     "getEntries",
-    ()=>getEntries
+    ()=>getEntries,
+    "getEntryById",
+    ()=>getEntryById
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/index.mjs [app-rsc] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.node.mjs [app-rsc] (ecmascript)");
@@ -153,6 +155,22 @@ const getEntries = async ()=>{
         return entries;
     } catch (error) {
         console.error('API: Error getting entries:', error);
+        throw error;
+    }
+};
+const getEntryById = async (id)=>{
+    try {
+        const docRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["doc"])(__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$firebase$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"], 'Entries', id);
+        const docSnap = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getDoc"])(docRef);
+        if (docSnap.exists()) {
+            return {
+                id: docSnap.id,
+                ...docSnap.data()
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('API: Error getting entry by ID:', error);
         throw error;
     }
 };
@@ -184,10 +202,11 @@ const deleteEntry = async (id)=>{
 
 __turbopack_context__.s([
     "EntriesClient",
-    ()=>EntriesClient
+    ()=>EntriesClient,
+    "generateStaticParams",
+    ()=>generateStaticParams
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
-// No 'use client' = Server Component with SSR!
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$react$2d$server$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/client/app-dir/link.react-server.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-icons/fa/index.mjs [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$pi$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-icons/pi/index.mjs [app-rsc] (ecmascript)");
@@ -197,13 +216,10 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$entry$2e$ts__$5b$app$
 ;
 ;
 ;
-const EntriesClient = async ()=>{
-    // Get entries from firebase - runs on the server!
-    const entries = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$entry$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getEntries"])();
-    // Sort entries by date (newest to oldest)
-    const sortedEntries = entries.sort((a, b)=>{
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
+async function generateStaticParams() {
+    return await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$entry$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getEntries"])();
+}
+const EntriesClient = ({ entries })=>{
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "flex flex-col w-4/5 md:w-3/4 mx-auto pb-8 gap-4",
         children: [
@@ -212,32 +228,36 @@ const EntriesClient = async ()=>{
                 children: "All Entries"
             }, void 0, false, {
                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                lineNumber: 19,
+                lineNumber: 17,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                 className: "text-2xl font-bold",
                 children: [
                     " Total Entries: ",
-                    sortedEntries.length
+                    entries.length
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                lineNumber: 20,
+                lineNumber: 18,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "flex flex-wrap gap-6",
-                children: sortedEntries.map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                children: entries.map((entry, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "border border-[#D4C4A8] rounded-br-md rounded-bl-md flex-grow bg-white w-full md:w-1/4 max-w-md shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col",
                         children: [
                             entry.images && entry.images.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
                                 src: entry.images[0],
                                 alt: entry.name,
-                                className: "w-full h-64 object-cover object-center"
+                                className: "w-full h-64 object-cover object-center",
+                                onError: (e)=>{
+                                    console.log('Image failed to load:', entry.images[0]);
+                                    e.currentTarget.style.display = 'none';
+                                }
                             }, void 0, false, {
                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                lineNumber: 25,
+                                lineNumber: 23,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "w-full h-64 bg-gray-200 flex items-center justify-center",
@@ -246,12 +266,12 @@ const EntriesClient = async ()=>{
                                     children: "No image available"
                                 }, void 0, false, {
                                     fileName: "[project]/app/entries/EntriesClient.tsx",
-                                    lineNumber: 32,
+                                    lineNumber: 34,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                lineNumber: 31,
+                                lineNumber: 33,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -267,12 +287,12 @@ const EntriesClient = async ()=>{
                                                         children: label
                                                     }, labelIndex, false, {
                                                         fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                        lineNumber: 39,
+                                                        lineNumber: 41,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)))
                                             }, void 0, false, {
                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                lineNumber: 37,
+                                                lineNumber: 39,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -280,7 +300,7 @@ const EntriesClient = async ()=>{
                                                 children: entry.name
                                             }, void 0, false, {
                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                lineNumber: 47,
+                                                lineNumber: 49,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -288,13 +308,13 @@ const EntriesClient = async ()=>{
                                                 children: entry.summary
                                             }, void 0, false, {
                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                lineNumber: 48,
+                                                lineNumber: 50,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/entries/EntriesClient.tsx",
-                                        lineNumber: 36,
+                                        lineNumber: 38,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -309,25 +329,25 @@ const EntriesClient = async ()=>{
                                                             children: "Read More"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                            lineNumber: 56,
+                                                            lineNumber: 58,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["FaArrowRight"], {
                                                             className: "text-xs"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                            lineNumber: 57,
+                                                            lineNumber: 59,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                    lineNumber: 52,
+                                                    lineNumber: 54,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                lineNumber: 51,
+                                                lineNumber: 53,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -340,7 +360,7 @@ const EntriesClient = async ()=>{
                                                                 className: "text-headingcolor"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                                lineNumber: 62,
+                                                                lineNumber: 64,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -348,13 +368,13 @@ const EntriesClient = async ()=>{
                                                                 children: entry.date
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                                lineNumber: 63,
+                                                                lineNumber: 65,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                        lineNumber: 61,
+                                                        lineNumber: 63,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -364,7 +384,7 @@ const EntriesClient = async ()=>{
                                                                 className: "text-accentcolor text-2xl"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                                lineNumber: 66,
+                                                                lineNumber: 68,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -372,48 +392,48 @@ const EntriesClient = async ()=>{
                                                                 children: entry.rating
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                                lineNumber: 67,
+                                                                lineNumber: 69,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                        lineNumber: 65,
+                                                        lineNumber: 67,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                                lineNumber: 60,
+                                                lineNumber: 62,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/entries/EntriesClient.tsx",
-                                        lineNumber: 50,
+                                        lineNumber: 52,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                                lineNumber: 35,
+                                lineNumber: 37,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, entry.id || index, true, {
                         fileName: "[project]/app/entries/EntriesClient.tsx",
-                        lineNumber: 23,
+                        lineNumber: 21,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)))
             }, void 0, false, {
                 fileName: "[project]/app/entries/EntriesClient.tsx",
-                lineNumber: 21,
+                lineNumber: 19,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/app/entries/EntriesClient.tsx",
-        lineNumber: 18,
+        lineNumber: 16,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -427,12 +447,22 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$entries$2f$EntriesClient$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/entries/EntriesClient.tsx [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$entry$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/entry.ts [app-rsc] (ecmascript)");
 ;
 ;
-function EntriesPage() {
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$entries$2f$EntriesClient$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["EntriesClient"], {}, void 0, false, {
+;
+async function EntriesPage() {
+    // Get entries from firebase
+    const entries = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$entry$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getEntries"])();
+    // Sort entries by date (newest to oldest)
+    const sortedEntries = entries.sort((a, b)=>{
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$entries$2f$EntriesClient$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["EntriesClient"], {
+        entries: sortedEntries
+    }, void 0, false, {
         fileName: "[project]/app/entries/page.tsx",
-        lineNumber: 5,
+        lineNumber: 13,
         columnNumber: 10
     }, this);
 }
