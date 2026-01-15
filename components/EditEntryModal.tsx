@@ -4,6 +4,7 @@ import { useState, FormEvent, ChangeEvent, useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Entry } from '@/lib/entry'
 import { CustomSelect } from './CustomSelect'
+import { uploadToCloudinary } from '@/lib/cloudinary'
 
 interface EditEntryModalProps {
   isOpen: boolean
@@ -37,6 +38,7 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
     password: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [labelInput, setLabelInput] = useState<string>('')
 
   // Convert date from MM/DD/YYYY to YYYY-MM-DD for date input
@@ -150,69 +152,29 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
     }))
   }
 
-  const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.8): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      const img = new Image()
-      
-      img.onload = () => {
-        let { width, height } = img
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width
-          width = maxWidth
-        }
-        
-        canvas.width = width
-        canvas.height = height
-        
-        ctx?.drawImage(img, 0, 0, width, height)
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
-        resolve(compressedDataUrl)
-      }
-      
-      img.onerror = reject
-      img.src = URL.createObjectURL(file)
-    })
-  }
-
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = e.target.files
-    if (files) {
-      const fileArray = Array.from(files)
-      
-      for (let i = 0; i < fileArray.length; i++) {
-        const file = fileArray[i]
+    if (!files || files.length === 0) return
+
+    setIsUploading(true)
+    const fileArray = Array.from(files)
+    
+    for (const file of fileArray) {
+      try {
+        // Upload directly to Cloudinary (they handle compression/optimization)
+        const imageUrl = await uploadToCloudinary(file)
         
-        try {
-          let base64String: string
-          if (file.size > 500000) {
-            console.log(`Compressing large image: ${file.name}`)
-            base64String = await compressImage(file, 800, 0.7)
-          } else {
-            base64String = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader()
-              reader.onload = (event) => resolve(event.target?.result as string)
-              reader.onerror = reject
-              reader.readAsDataURL(file)
-            })
-          }
-          
-          if (base64String.length > 1000000) {
-            alert(`Image "${file.name}" is too large even after compression. Please use a smaller image.`)
-            continue
-          }
-          
-          setFormData(prev => ({
-            ...prev,
-            images: [...prev.images, base64String]
-          }))
-        } catch (error) {
-          console.error('Error processing file:', error)
-          alert(`Error processing image "${file.name}". Please try a different image.`)
-        }
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, imageUrl]
+        }))
+      } catch (error) {
+        console.error('Error uploading file:', error)
+        alert(`Error uploading image "${file.name}". Please try again.`)
       }
     }
+    
+    setIsUploading(false)
   }
 
   const removeImage = (imageToRemove: string): void => {
@@ -387,7 +349,11 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
                 multiple
                 onChange={handleImageUpload}
                 className="input"
+                disabled={isUploading}
               />
+              {isUploading && (
+                <p className="text-sm text-blue-600 mt-1">Uploading images...</p>
+              )}
               <p className="text-xs mt-1">
                 Your first image will be used as the main image for the entry.
                 Upload images of your recipe and outcome. You can select multiple images at once.
@@ -414,9 +380,9 @@ export const EditEntryModal = ({ isOpen, onOpenChange, entry, onSave }: EditEntr
               <button 
                 type="submit"
                 className="primary-btn"
-                disabled={isLoading}
+                disabled={isLoading || isUploading}
               >
-                {isLoading ? 'Updating...' : 'Update Entry'}
+                {isLoading ? 'Updating...' : isUploading ? 'Uploading...' : 'Update Entry'}
               </button>
             </div>
           </form>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { FaRegCalendarAlt, FaArrowRight } from "react-icons/fa"
 import { PiCactusFill } from "react-icons/pi"
 import { Entry } from '@/lib/entry'
@@ -17,21 +18,22 @@ export const EntriesClient = ({ entries }: EntriesClientProps) => {
       <div className="flex flex-wrap gap-6">
         {entries.map((entry, index) => (
           <div key={entry.id || index} className="border border-[#D4C4A8] rounded-br-md rounded-bl-md flex-grow bg-white w-full md:w-1/4 max-w-md shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col">
-            {entry.images && entry.images.length > 0 ? (
-              <img 
-                src={entry.images[0]} 
-                alt={entry.name}
-                className="w-full h-64 object-cover object-center"
-                onError={(e) => {
-                  console.log('Image failed to load:', entry.images[0])
-                  e.currentTarget.style.display = 'none'
-                }}
-              />
-            ) : (
-              <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-                <p className="text-gray-500">No image available</p>
-              </div>
-            )}
+            <div className="w-full h-64 bg-gray-200 relative overflow-hidden">
+              {entry.images && entry.images.length > 0 ? (
+                <Image 
+                  src={entry.images[0]} 
+                  alt={entry.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover object-center"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-full h-64 flex items-center justify-center">
+                  <p className="text-gray-500">No image available</p>
+                </div>
+              )}
+            </div>
             <div className="p-6 flex flex-col gap-6 justify-between flex-1">
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
